@@ -80,7 +80,7 @@ function spark(vals,color){
 }
 
 function render(){
-  const ano=$("fAno").value,cat=+$("fCat").value,canal=+$("fCanal").value,ref=$("fMes").value;
+  const ano=$("fAno").value,cat=+$("fCat").value,canal=+$("fCanal").value,ref=M.find(m=>m===$("fMes").value)||M[M.length-1];
   const {S,pm}=filtrar(cat,canal);
   const vis=M.map((_,i)=>i).filter(i=>!ano||M[i].startsWith(ano));
   const msV=vis.map(i=>M[i]),ri=M.indexOf(ref);
@@ -94,7 +94,7 @@ function render(){
   const win=[...Array(Math.min(12,ri+1)).keys()].map(k=>ri-k).reverse();
   const k=[
     ["Receita",mi(cur.rec),win.map(i=>S[i].rec),delta(cur.rec,ant&&ant.rec),delta(cur.rec,ya&&ya.rec),
-      `Acumulado ${Y}: <b>${mi(ytd)}</b> ${ytdPy?delta(ytd,ytdPy):""}`],
+      `Acumulado ${esc(Y)}: <b>${mi(ytd)}</b> ${ytdPy?delta(ytd,ytdPy):""}`],
     ["Lucro bruto",mi(cur.rec-cur.cus),win.map(i=>S[i].rec-S[i].cus),delta(cur.rec-cur.cus,ant&&ant.rec-ant.cus),delta(cur.rec-cur.cus,ya&&ya.rec-ya.cus),
       `Custo total: ${mi(cur.cus)}`],
     ["Margem bruta",pc(marg(cur)??0),win.map(i=>marg(S[i])??0),delta(marg(cur),marg(ant),"pp"),delta(marg(cur),marg(ya),"pp"),
