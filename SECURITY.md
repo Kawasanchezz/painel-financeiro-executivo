@@ -20,7 +20,7 @@ Use o recurso **"Report a vulnerability"** (aba *Security* do repositório no Gi
 - `Banco de Dados/gerar_base.py` falha se algum texto exportado começar com `=`, `+`, `-` ou `@` (injeção de fórmulas em CSV/Excel).
 - `dados.js` inválido ou ausente faz o dashboard exibir uma mensagem de erro em vez de quebrar.
 - Testes automatizados: `python Dashboard/rodar_testes.py` (requer Chrome ou Edge). Cobre fluxo funcional sob a CSP, XSS com e sem escape e defesa da CSP.
-- Automação no GitHub: `.github/workflows/ci.yml` (auditoria de dependências, compilação e testes) e `codeql.yml` (análise estática), ambos com `permissions` mínimas; `dependabot.yml` para atualizações.
+- Automação no GitHub: `.github/workflows/ci.yml` (auditoria de dependências, compilação e testes), `codeql.yml` (análise estática) e `dependency-review.yml` (bloqueia PRs com dependência vulnerável), ambos com `permissions` mínimas; `dependabot.yml` para atualizações.
 - Licença: MIT (ver `LICENSE`).
 
 ## Limitações conhecidas
