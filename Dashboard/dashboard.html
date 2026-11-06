@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Painel Financeiro Executivo</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="top">
+    <div><h1>Painel Financeiro Executivo</h1><small>Varejo / e-commerce · dados simulados · valores em R$</small></div>
+    <div class="filtros">
+      <label>Ano<select id="fAno"></select></label>
+      <label>Mês de referência<select id="fMes"></select></label>
+      <label>Categoria<select id="fCat"></select></label>
+      <label>Centro de custo<select id="fCanal"></select></label>
+      <button class="rst" id="rst" title="Limpar filtros">↺ Limpar</button>
+    </div>
+  </div>
+  <nav><button class="on" data-pg="pg1">Visão geral</button><button data-pg="pg2">Detalhamento</button></nav>
+</header>
+<main>
+<div id="pg1" class="pg on">
+  <section class="kpis" id="kpis"></section>
+  <section class="row r21">
+    <div class="card"><h3 id="t1"></h3><p class="d">Clique em uma coluna para definir o mês de referência</p><div id="c1"></div><ul class="evt" id="evt"></ul></div>
+    <div class="card"><h3>Variação mensal da receita</h3><p class="d">Sobre o mês anterior</p><div id="c2"></div></div>
+  </section>
+  <section class="row r2">
+    <div class="card"><h3 id="t3"></h3><p class="d">Receita acumulada no ano vs. ano anterior (R$ mi)</p><div id="c3"></div></div>
+    <div class="card ins"><h3>Leitura executiva</h3><p class="d">Gerada automaticamente a partir dos filtros</p><ul id="ins"></ul></div>
+  </section>
+</div>
+
+<div id="pg2" class="pg">
+  <section class="card"><h3>Receita e margem por categoria › subcategoria › produto</h3><p class="d" id="dm">Clique nas linhas para expandir. Clique no nome da categoria para filtrar a página. Var. YoY compara apenas os meses que têm ano anterior na base.</p><div id="matriz"></div></section>
+  <section class="card"><h3>Mapa de margem por categoria e mês</h3><p class="d">Verde = acima da meta de 25% · vermelho = abaixo. Quanto mais forte a cor, maior o desvio.</p><div id="heat"></div></section>
+  <section class="row r3">
+    <div class="card"><h3>Centro de custo</h3><p class="d dp"></p><div id="cc"></div></div>
+    <div class="card"><h3>Segmento de cliente</h3><p class="d dp"></p><div id="cs"></div></div>
+    <div class="card"><h3>Região</h3><p class="d dp"></p><div id="cr"></div></div>
+  </section>
+  <section class="card"><h3>Top 10 clientes</h3><p class="d dp"></p><div id="top"></div></section>
+</div>
+<p class="foot">Dados simulados para fins de portfólio · cálculos equivalentes às medidas DAX do projeto (pedidos = contagem distinta)</p>
+</main>
+<div id="tip"></div>
+<script src="dados.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

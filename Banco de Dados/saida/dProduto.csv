@@ -1,0 +1,25 @@
+﻿id_produto;categoria;subcategoria;produto;preco_base;custo_unit
+1;Eletrônicos;Smartphones;Smartphone Pro 128GB;2800;2184.0
+2;Eletrônicos;Smartphones;Smartphone Lite 64GB;1200;888.0
+3;Eletrônicos;Áudio;Fone Bluetooth ANC;450;279.0
+4;Eletrônicos;Áudio;Caixa de Som Portátil;320;204.8
+5;Eletrônicos;Acessórios;Carregador Rápido 65W;140;67.2
+6;Eletrônicos;Acessórios;Smartwatch Fit;690;462.3
+7;Casa e Cozinha;Eletroportáteis;Air Fryer 5L;520;343.2
+8;Casa e Cozinha;Eletroportáteis;Cafeteira Expresso;780;530.4
+9;Casa e Cozinha;Eletroportáteis;Liquidificador Turbo;260;156.0
+10;Casa e Cozinha;Utensílios;Jogo de Panelas 10pç;410;225.5
+11;Casa e Cozinha;Utensílios;Conjunto de Facas;190;95.0
+12;Casa e Cozinha;Decoração;Luminária de Mesa LED;150;67.5
+13;Moda;Vestuário;Jaqueta Corta-Vento;330;165.0
+14;Moda;Vestuário;Camiseta Algodão Premium;90;37.8
+15;Moda;Calçados;Tênis Running;380;205.2
+16;Moda;Calçados;Sandália Conforto;140;67.2
+17;Moda;Acessórios;Mochila Urbana;210;105.0
+18;Moda;Acessórios;Relógio Casual;280;145.6
+19;Esporte e Lazer;Fitness;Kit Halteres 20kg;310;186.0
+20;Esporte e Lazer;Fitness;Esteira Dobrável;2400;1824.0
+21;Esporte e Lazer;Outdoor;Barraca 4 Pessoas;560;347.2
+22;Esporte e Lazer;Outdoor;Bicicleta Aro 29;1900;1406.0
+23;Esporte e Lazer;Suplementos;Whey Protein 900g;130;72.8
+24;Esporte e Lazer;Suplementos;Creatina 300g;95;50.35

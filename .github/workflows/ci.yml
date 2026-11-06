@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verificar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Instalar dependências
+        run: pip install -r requirements.txt pip-audit
+      - name: Auditoria de dependências
+        run: pip-audit -r requirements.txt
+      - name: Compilar scripts
+        run: python -m py_compile "Banco de Dados/gerar_base.py" "Dashboard/gerar_dashboard.py" "Dashboard/rodar_testes.py"
+      - name: Gerar base e dados do dashboard
+        run: |
+          (cd "Banco de Dados" && python gerar_base.py > /dev/null)
+          (cd Dashboard && python gerar_dashboard.py)
+      - name: Testes do dashboard (funcional, XSS e CSP)
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: python Dashboard/rodar_testes.py

@@ -1,0 +1,186 @@
+// =====================================================================
+// PAINEL FINANCEIRO EXECUTIVO - Etapa 2: Medidas DAX
+// Pré-requisitos:
+//  1) Relacionamentos 1:N: dCalendario[data], dProduto[id_produto],
+//     dCliente[id_cliente], dCentroCusto[id_centro_custo] -> fVendas
+//  2) dCalendario marcada como tabela de datas (coluna [data])
+//  3) dCalendario[mes_nome] classificada por [mes_num];
+//     dCalendario[ano_mes] é texto 'AAAA-MM' (já ordena sozinho)
+//  4) Crie uma tabela vazia "_Medidas" (Inserir dados > tabela em branco)
+//     e coloque as medidas nela. Display Folder = nome da seção abaixo.
+// =====================================================================
+
+
+// ---------------------------------------------------------------------
+// [Display Folder: 1. Base]
+// ---------------------------------------------------------------------
+
+// Soma da receita líquida. Respeita todos os filtros (período, categoria, canal...).
+Receita Total = SUM ( fVendas[receita] )
+
+// Custo = CMV + custo operacional do canal.
+Custo Total = SUM ( fVendas[custo] )
+
+// Lucro bruto = receita - custo.
+Lucro Bruto = [Receita Total] - [Custo Total]
+
+// DIVIDE evita erro de divisão por zero (retorna BLANK).
+Margem % = DIVIDE ( [Lucro Bruto], [Receita Total] )
+
+// Pedidos únicos: uma linha da fato é um item, não um pedido.
+Pedidos = DISTINCTCOUNT ( fVendas[id_pedido] )
+
+// Ticket médio = receita / pedidos distintos.
+Ticket Médio = DIVIDE ( [Receita Total], [Pedidos] )
+
+Desconto Total = SUM ( fVendas[desconto] )
+
+// % de desconto sobre a receita bruta (líquida + desconto).
+Desconto % = DIVIDE ( [Desconto Total], [Receita Total] + [Desconto Total] )
+
+
+// ---------------------------------------------------------------------
+// [Display Folder: 2. Comparativos]
+// ---------------------------------------------------------------------
+
+// Mês anterior. DATEADD desloca o contexto de data em 1 mês.
+// Funciona com o calendário como tabela de datas e filtro por mês/ano.
+Receita Mês Anterior =
+CALCULATE ( [Receita Total], DATEADD ( dCalendario[data], -1, MONTH ) )
+
+Variação MoM R$ =
+VAR Atual    = [Receita Total]
+VAR Anterior = [Receita Mês Anterior]
+RETURN IF ( NOT ISBLANK ( Anterior ), Atual - Anterior )
+
+Variação MoM % =
+VAR Atual    = [Receita Total]
+VAR Anterior = [Receita Mês Anterior]
+RETURN IF ( NOT ISBLANK ( Anterior ), DIVIDE ( Atual - Anterior, Anterior ) )
+
+// Mesmo período do ano anterior (SAMEPERIODLASTYEAR).
+Receita Ano Anterior =
+CALCULATE ( [Receita Total], SAMEPERIODLASTYEAR ( dCalendario[data] ) )
+
+Variação YoY R$ =
+VAR Atual    = [Receita Total]
+VAR Anterior = [Receita Ano Anterior]
+RETURN IF ( NOT ISBLANK ( Anterior ), Atual - Anterior )
+
+Variação YoY % =
+VAR Atual    = [Receita Total]
+VAR Anterior = [Receita Ano Anterior]
+RETURN IF ( NOT ISBLANK ( Anterior ), DIVIDE ( Atual - Anterior, Anterior ) )
+
+// Variação da margem em pontos percentuais vs. mês anterior.
+Margem MoM (p.p.) =
+VAR MargemAnt =
+    CALCULATE ( [Margem %], DATEADD ( dCalendario[data], -1, MONTH ) )
+RETURN IF ( NOT ISBLANK ( MargemAnt ), ( [Margem %] - MargemAnt ) * 100 )
+
+
+// ---------------------------------------------------------------------
+// [Display Folder: 3. Acumulados e Tendência]
+// ---------------------------------------------------------------------
+
+// Acumulado no ano (YTD) até a última data do contexto.
+Receita YTD = TOTALYTD ( [Receita Total], dCalendario[data] )
+
+Receita YTD Ano Anterior =
+CALCULATE ( [Receita YTD], SAMEPERIODLASTYEAR ( dCalendario[data] ) )
+
+// Média móvel de 3 meses: soma dos 3 últimos meses / 3.
+// O contexto deve estar em nível de mês (eixo do gráfico = ano_mes).
+Receita Média Móvel 3M =
+VAR UltimaData = MAX ( dCalendario[data] )
+VAR Janela =
+    DATESINPERIOD ( dCalendario[data], UltimaData, -3, MONTH )
+VAR MesesComDado =
+    CALCULATE ( DISTINCTCOUNT ( dCalendario[ano_mes] ), Janela )
+RETURN
+    DIVIDE ( CALCULATE ( [Receita Total], Janela ), MesesComDado )
+
+
+// ---------------------------------------------------------------------
+// [Display Folder: 4. Participação e Ranking]
+// ---------------------------------------------------------------------
+
+// % da receita do item atual (categoria, produto...) sobre o total do contexto
+// ignorando filtros de produto. ALLSELECTED respeita os demais slicers.
+Participação % Categoria =
+DIVIDE (
+    [Receita Total],
+    CALCULATE ( [Receita Total], ALLSELECTED ( dProduto ) )
+)
+
+// Ranking de produtos por receita (1 = maior).
+Ranking Produto =
+IF (
+    ISINSCOPE ( dProduto[produto] ),
+    RANKX ( ALLSELECTED ( dProduto[produto] ), [Receita Total], , DESC, DENSE )
+)
+
+// Ranking de clientes por receita.
+Ranking Cliente =
+IF (
+    ISINSCOPE ( dCliente[cliente] ),
+    RANKX ( ALLSELECTED ( dCliente[cliente] ), [Receita Total], , DESC, DENSE )
+)
+
+// Receita dos 10 maiores clientes no contexto atual (TOPN).
+Receita Top 10 Clientes =
+SUMX (
+    TOPN ( 10, ALLSELECTED ( dCliente[id_cliente] ), [Receita Total], DESC ),
+    [Receita Total]
+)
+
+// Concentração: quanto da receita está nos 10 maiores clientes (risco).
+Concentração Top 10 % = DIVIDE ( [Receita Top 10 Clientes], CALCULATE ( [Receita Total], ALLSELECTED ( dCliente ) ) )
+
+
+// ---------------------------------------------------------------------
+// [Display Folder: 5. Formatação Condicional]
+// ---------------------------------------------------------------------
+
+// Cor para variação (use em Formatação condicional > Valor do campo).
+// Verde = positivo, vermelho = negativo, cinza = sem base de comparação.
+Cor Variação MoM =
+VAR v = [Variação MoM %]
+RETURN SWITCH ( TRUE (), ISBLANK ( v ), "#9AA0A6", v >= 0, "#1E8E3E", "#D93025" )
+
+Cor Variação YoY =
+VAR v = [Variação YoY %]
+RETURN SWITCH ( TRUE (), ISBLANK ( v ), "#9AA0A6", v >= 0, "#1E8E3E", "#D93025" )
+
+// Cor da margem vs. meta (ajuste a meta; aqui 25%).
+Meta Margem % = 0.25
+Cor Margem =
+SWITCH ( TRUE (), ISBLANK ( [Margem %] ), "#9AA0A6",
+         [Margem %] >= [Meta Margem %], "#1E8E3E",
+         [Margem %] >= [Meta Margem %] - 0.03, "#F9AB00",
+         "#D93025" )
+
+// Ícone + texto para cards (setas Unicode; não dependem de fonte especial).
+Ícone MoM =
+VAR v = [Variação MoM %]
+RETURN SWITCH ( TRUE (), ISBLANK ( v ), "–", v >= 0, "▲", "▼" )
+
+// Texto pronto para subtítulo de card: "▲ +12,3% vs. mês anterior".
+Texto Variação MoM =
+VAR v = [Variação MoM %]
+RETURN IF ( ISBLANK ( v ), "sem comparação",
+            [Ícone MoM] & " " & FORMAT ( v, "+0.0%;-0.0%" ) & " vs. mês anterior" )
+
+Texto Variação YoY =
+VAR v = [Variação YoY %]
+RETURN IF ( ISBLANK ( v ), "sem comparação",
+            IF ( v >= 0, "▲ ", "▼ " ) & FORMAT ( v, "+0.0%;-0.0%" ) & " vs. ano anterior" )
+
+
+// ---------------------------------------------------------------------
+// [Display Folder: 6. Títulos Dinâmicos]
+// ---------------------------------------------------------------------
+
+Título Receita =
+"Receita de " & FORMAT ( MIN ( dCalendario[data] ), "mmm/yyyy" )
+    & " a " & FORMAT ( MAX ( dCalendario[data] ), "mmm/yyyy" )
